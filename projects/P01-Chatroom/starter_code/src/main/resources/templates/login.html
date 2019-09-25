@@ -150,7 +150,16 @@
      * Login
      */
     function login() {
-        // TODO: complete the login function
+        var username = $('#username').val();
+
+        // Check if username is filled.
+        if (!username || username.length < 3 || username.trim() === '') {
+            alert('You must fill your username!');
+            return;
+        }
+
+        // Redirect with username as query string.
+        document.location.href = '/index?username=' + username;
     }
 
     /**
