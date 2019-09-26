@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" lang="pt-Br">
 <head>
     <title>Chat Room</title>
     <meta charset="utf-8" name="viewport" content="width=device-width">
@@ -26,14 +26,14 @@
                 <div class="mdui-col-xs-12 mdui-col-sm-10">
                     <div class="mdui-textfield-floating-label" style="margin-top:15px">
                         <i class="mdui-icon">Welcome：</i>
-                        <i class="mdui-icon" id="username" th:text="${username}"></i>
+                        <i class="mdui-icon" id="username" th:text="${user.getUsername()}"></i>
                     </div>
                 </div>
                 <div class="mdui-col-xs-12 mdui-col-sm-10">
                     <div class="mdui-textfield mdui-textfield-floating-label">
                         <i class="mdui-icon material-icons">textsms</i>
-                        <label class="mdui-textfield-label">Send Text</label>
-                        <input class="mdui-textfield-input" id="msg"/>
+                        <label for="msg" class="mdui-textfield-label">Send Text</label>
+                        <input class="mdui-textfield-input" id="msg" />
                     </div>
                     <div class="mdui-container" style="padding:20px 35px">
                         <button class="mdui-btn mdui-color-theme-accent mdui-ripple"
@@ -160,5 +160,3 @@
 
 </body>
 </html>
-
-
