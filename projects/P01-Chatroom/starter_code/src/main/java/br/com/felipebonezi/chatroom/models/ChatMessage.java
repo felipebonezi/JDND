@@ -2,12 +2,12 @@ package br.com.felipebonezi.chatroom.models;
 
 import edu.udacity.java.nano.chat.Message;
 
-public class SpeakMessage extends OnlineUserMessage {
+public class ChatMessage extends EnterMessage {
 
     private String username;
     private String msg;
 
-    public SpeakMessage() {
+    public ChatMessage() {
     }
 
     public String getUsername() {

@@ -6,8 +6,9 @@ package edu.udacity.java.nano.chat;
 public abstract class Message {
 
     public enum Type {
+        ENTER,
         SPEAK,
-        ONLINE_USERS
+        LEAVE
     }
 
     public Message() {

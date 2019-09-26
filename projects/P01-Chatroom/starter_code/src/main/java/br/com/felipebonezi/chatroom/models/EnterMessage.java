@@ -2,11 +2,11 @@ package br.com.felipebonezi.chatroom.models;
 
 import edu.udacity.java.nano.chat.Message;
 
-public class OnlineUserMessage extends Message {
+public class EnterMessage extends Message {
 
     private int onlineCount;
 
-    public OnlineUserMessage() {
+    public EnterMessage() {
     }
 
     public int getOnlineCount() {
@@ -19,7 +19,7 @@ public class OnlineUserMessage extends Message {
 
     @Override
     public Message.Type getType() {
-        return Message.Type.ONLINE_USERS;
+        return Message.Type.ENTER;
     }
 
 }

@@ -1,7 +1,8 @@
 package edu.udacity.java.nano.chat;
 
-import br.com.felipebonezi.chatroom.models.OnlineUserMessage;
-import br.com.felipebonezi.chatroom.models.SpeakMessage;
+import br.com.felipebonezi.chatroom.models.EnterMessage;
+import br.com.felipebonezi.chatroom.models.ChatMessage;
+import br.com.felipebonezi.chatroom.models.LeaveMessage;
 import com.alibaba.fastjson.JSON;
 import org.springframework.stereotype.Component;
 
@@ -16,7 +17,6 @@ import java.util.concurrent.ConcurrentHashMap;
  * @see ServerEndpoint WebSocket Client
  * @see Session   WebSocket Session
  */
-
 @Component
 @ServerEndpoint("/chat")
 public class WebSocketChatServer {
@@ -26,12 +26,15 @@ public class WebSocketChatServer {
      */
     private static final Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
 
-    private void sendMessageToAll(OnlineUserMessage msg) {
+    private void sendMessageToAll(Message msg) {
         onlineSessions.forEach((key, session) -> this.sendMessage(session, msg));
     }
 
-    private void sendMessage(Session session, OnlineUserMessage msg) {
-        msg.setOnlineCount(onlineSessions.size());
+    private void sendMessage(Session session, Message msg) {
+        if (msg instanceof EnterMessage) {
+            EnterMessage enterMsg = (EnterMessage) msg;
+            enterMsg.setOnlineCount(onlineSessions.size());
+        }
 
         RemoteEndpoint.Async asyncRemote = session.getAsyncRemote();
         asyncRemote.sendText(JSON.toJSONString(msg), sendResult -> {
@@ -49,7 +52,7 @@ public class WebSocketChatServer {
     @OnOpen
     public void onOpen(Session session) {
         onlineSessions.put(session.getId(), session);
-        this.sendMessageToAll(new OnlineUserMessage());
+        this.sendMessageToAll(new EnterMessage());
     }
 
     /**
@@ -60,7 +63,7 @@ public class WebSocketChatServer {
         if (!onlineSessions.containsKey(session.getId()))
             return;
 
-        SpeakMessage message = JSON.parseObject(jsonStr, SpeakMessage.class);
+        ChatMessage message = JSON.parseObject(jsonStr, ChatMessage.class);
         this.sendMessageToAll(message);
     }
 
@@ -70,7 +73,7 @@ public class WebSocketChatServer {
     @OnClose
     public void onClose(Session session) {
         onlineSessions.remove(session.getId());
-        this.sendMessageToAll(new OnlineUserMessage());
+        this.sendMessageToAll(new LeaveMessage());
     }
 
     /**
@@ -79,7 +82,7 @@ public class WebSocketChatServer {
     @OnError
     public void onError(Session session, Throwable error) {
         error.printStackTrace();
-        SpeakMessage msg = new SpeakMessage();
+        ChatMessage msg = new ChatMessage();
         msg.setUsername("system");
         msg.setMsg("Sorry, we cannot process your request because an error was throw.");
         this.sendMessage(session, msg);
