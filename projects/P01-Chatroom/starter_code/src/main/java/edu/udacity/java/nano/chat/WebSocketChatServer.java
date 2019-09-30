@@ -1,8 +1,8 @@
 package edu.udacity.java.nano.chat;
 
-import br.com.felipebonezi.chatroom.models.EnterMessage;
-import br.com.felipebonezi.chatroom.models.ChatMessage;
-import br.com.felipebonezi.chatroom.models.LeaveMessage;
+import edu.udacity.java.nano.model.EnterMessage;
+import edu.udacity.java.nano.model.ChatMessage;
+import edu.udacity.java.nano.model.LeaveMessage;
 import com.alibaba.fastjson.JSON;
 import org.springframework.stereotype.Component;
 

@@ -1,4 +1,4 @@
-package br.com.felipebonezi.chatroom.models;
+package edu.udacity.java.nano.model;
 
 import edu.udacity.java.nano.chat.Message;
 

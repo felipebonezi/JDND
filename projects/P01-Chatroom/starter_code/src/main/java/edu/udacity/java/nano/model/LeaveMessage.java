@@ -1,4 +1,4 @@
-package br.com.felipebonezi.chatroom.models;
+package edu.udacity.java.nano.model;
 
 public class LeaveMessage extends EnterMessage {
 
