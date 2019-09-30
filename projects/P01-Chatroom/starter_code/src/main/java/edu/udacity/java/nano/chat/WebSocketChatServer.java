@@ -1,8 +1,5 @@
 package edu.udacity.java.nano.chat;
 
-import edu.udacity.java.nano.model.EnterMessage;
-import edu.udacity.java.nano.model.ChatMessage;
-import edu.udacity.java.nano.model.LeaveMessage;
 import com.alibaba.fastjson.JSON;
 import org.springframework.stereotype.Component;
 
@@ -24,25 +21,20 @@ public class WebSocketChatServer {
     /**
      * All chat sessions.
      */
-    private static final Map<String, Session> onlineSessions = new ConcurrentHashMap<>();
+    private static final Map<String, Session> SESSIONS = new ConcurrentHashMap<>();
 
     private void sendMessageToAll(Message msg) {
-        onlineSessions.forEach((key, session) -> this.sendMessage(session, msg));
+        SESSIONS.forEach((key, session) -> this.sendMessage(session, msg));
     }
 
     private void sendMessage(Session session, Message msg) {
-        if (msg instanceof EnterMessage) {
-            EnterMessage enterMsg = (EnterMessage) msg;
-            enterMsg.setOnlineCount(onlineSessions.size());
-        }
-
         RemoteEndpoint.Async asyncRemote = session.getAsyncRemote();
         asyncRemote.sendText(JSON.toJSONString(msg), sendResult -> {
             if (sendResult.isOK())
                 return;
 
             // Remove the session.
-            onlineSessions.remove(session.getId());
+            SESSIONS.remove(session.getId());
         });
     }
 
@@ -51,8 +43,14 @@ public class WebSocketChatServer {
      */
     @OnOpen
     public void onOpen(Session session) {
-        onlineSessions.put(session.getId(), session);
-        this.sendMessageToAll(new EnterMessage());
+        String username = session.getId();
+        SESSIONS.put(username, session);
+        Message msg = new Message.Builder()
+                .setType(Message.Type.ENTER)
+                .setUsername(username)
+                .setOnlineCount(SESSIONS.size())
+                .build();
+        this.sendMessageToAll(msg);
     }
 
     /**
@@ -60,11 +58,14 @@ public class WebSocketChatServer {
      */
     @OnMessage
     public void onMessage(Session session, String jsonStr) {
-        if (!onlineSessions.containsKey(session.getId()))
+        if (!SESSIONS.containsKey(session.getId()))
             return;
 
-        ChatMessage message = JSON.parseObject(jsonStr, ChatMessage.class);
-        this.sendMessageToAll(message);
+        Message msg = JSON.parseObject(jsonStr, Message.Builder.class)
+                .setType(Message.Type.SPEAK)
+                .setOnlineCount(SESSIONS.size())
+                .build();
+        this.sendMessageToAll(msg);
     }
 
     /**
@@ -72,8 +73,14 @@ public class WebSocketChatServer {
      */
     @OnClose
     public void onClose(Session session) {
-        onlineSessions.remove(session.getId());
-        this.sendMessageToAll(new LeaveMessage());
+        String username = session.getId();
+        SESSIONS.remove(username);
+        Message msg = new Message.Builder()
+                .setType(Message.Type.LEAVE)
+                .setUsername(username)
+                .setOnlineCount(SESSIONS.size())
+                .build();
+        this.sendMessageToAll(msg);
     }
 
     /**
@@ -82,9 +89,12 @@ public class WebSocketChatServer {
     @OnError
     public void onError(Session session, Throwable error) {
         error.printStackTrace();
-        ChatMessage msg = new ChatMessage();
-        msg.setUsername("system");
-        msg.setMsg("Sorry, we cannot process your request because an error was throw.");
+        Message msg = new Message.Builder()
+                .setType(Message.Type.SPEAK)
+                .setUsername("system")
+                .setMsg("Sorry, we cannot process your request because an error was throw.")
+                .setOnlineCount(SESSIONS.size())
+                .build();
         this.sendMessage(session, msg);
     }
 
