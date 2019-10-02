@@ -65,9 +65,9 @@ public class CarControllerTest {
     public void setup() {
         Car car = getCar();
         car.setId(1L);
-        given(carService.save(any())).willReturn(car);
-        given(carService.findById(any())).willReturn(car);
-        given(carService.list()).willReturn(Collections.singletonList(car));
+        given(this.carService.save(any())).willReturn(car);
+        given(this.carService.findById(any())).willReturn(car);
+        given(this.carService.list()).willReturn(Collections.singletonList(car));
     }
 
     /**
@@ -91,7 +91,6 @@ public class CarControllerTest {
      */
     @Test
     public void listCars() throws Exception {
-        Car car = this.getCar();
         String jsonContent = this.mvc.perform(
                 get(new URI("/cars"))
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
@@ -103,10 +102,11 @@ public class CarControllerTest {
 
         JSONObject json = JSON.parseObject(jsonContent);
         JSONArray jsonCars = json.getJSONObject("_embedded").getJSONArray("carList");
-
-        Details details = car.getDetails();
         JSONObject jsonDetails  = jsonCars.getJSONObject(0).getJSONObject("details");
         Details detailsToCheck = JSON.parseObject(jsonDetails.toJSONString(), Details.class);
+
+        Car car = this.getCar();
+        Details details = car.getDetails();
 
         assert details.equals(detailsToCheck);
     }
