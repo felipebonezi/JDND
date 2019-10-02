@@ -37,4 +37,9 @@ public class Price {
     public void setVehicleId(Long vehicleId) {
         this.vehicleId = vehicleId;
     }
+
+    public String getPriceFormatted() {
+        return String.format("%s %s", this.currency, this.price);
+    }
+
 }
