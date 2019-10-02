@@ -6,8 +6,6 @@ import com.udacity.vehicles.client.prices.Price;
 import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
@@ -16,7 +14,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import java.time.Duration;
 import java.util.List;
-import java.util.Optional;
 
 /**
  * Implements the car service create, read, update or delete
@@ -25,8 +22,6 @@ import java.util.Optional;
  */
 @Service
 public class CarService {
-
-    private static final Logger logger = LoggerFactory.getLogger("CarService");
 
     private final WebClient mapsWS;
     private final WebClient pricingWS;
@@ -113,16 +108,10 @@ public class CarService {
      * @param id the ID number of the car to delete
      */
     public void delete(Long id) {
-        /**
-         * TODO: Find the car by ID from the `repository` if it exists.
-         *   If it does not exist, throw a CarNotFoundException
-         */
+        Car car = this.repository.findById(id)
+                .orElseThrow(CarNotFoundException::new);
 
-
-        /**
-         * TODO: Delete the car from the repository.
-         */
-
-
+        this.repository.delete(car);
     }
+
 }
