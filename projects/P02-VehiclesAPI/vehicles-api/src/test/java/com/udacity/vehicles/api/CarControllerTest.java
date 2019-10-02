@@ -79,7 +79,7 @@ public class CarControllerTest {
         Car car = getCar();
         this.mvc.perform(
                 post(new URI("/cars"))
-                        .content(json.write(car).getJson())
+                        .content(this.json.write(car).getJson())
                         .contentType(MediaType.APPLICATION_JSON_UTF8)
                         .accept(MediaType.APPLICATION_JSON_UTF8))
                 .andExpect(status().isCreated());
