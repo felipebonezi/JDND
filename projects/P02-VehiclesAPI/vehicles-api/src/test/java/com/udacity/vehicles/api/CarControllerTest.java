@@ -96,6 +96,22 @@ public class CarControllerTest {
                 .andExpect(status().isCreated());
     }
 
+    @Test
+    public void updateCar() throws Exception {
+        Car car = getCar();
+        car.setCondition(Condition.NEW);
+        Details details = car.getDetails();
+        details.setExternalColor("Blue");
+
+        long vehicleId = 1L;
+        this.mvc.perform(
+                put(new URI(String.format("/cars/%d", vehicleId)))
+                        .content(this.json.write(car).getJson())
+                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+                        .accept(MediaType.APPLICATION_JSON_UTF8))
+                .andExpect(status().isOk());
+    }
+
     /**
      * Tests if the read operation appropriately returns a list of vehicles.
      * @throws Exception if the read operation of the vehicle list fails

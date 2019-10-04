@@ -76,9 +76,13 @@ class CarController {
      */
     @PutMapping("/{id}")
     ResponseEntity<?> put(@PathVariable Long id, @Valid @RequestBody Car car) {
-        car.setId(id);
+        // Check if car is already saved on the repository.
+        Car carToUpdate = this.carService.findById(id);
+
+        car.setId(carToUpdate.getId());
         Car carSaved = this.carService.save(car);
-        Resource<Car> resource = assembler.toResource(carSaved);
+
+        Resource<Car> resource = this.assembler.toResource(carSaved);
         return ResponseEntity.ok(resource);
     }
 
