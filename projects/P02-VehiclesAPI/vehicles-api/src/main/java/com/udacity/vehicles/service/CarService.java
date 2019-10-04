@@ -1,18 +1,12 @@
 package com.udacity.vehicles.service;
 
-import com.alibaba.fastjson.JSON;
-import com.udacity.vehicles.client.maps.Address;
-import com.udacity.vehicles.client.prices.Price;
+import com.udacity.vehicles.client.maps.MapsClient;
+import com.udacity.vehicles.client.prices.PriceClient;
 import com.udacity.vehicles.domain.Location;
 import com.udacity.vehicles.domain.car.Car;
 import com.udacity.vehicles.domain.car.CarRepository;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
-import org.springframework.web.reactive.function.client.WebClient;
 
-import java.time.Duration;
 import java.util.List;
 
 /**
@@ -23,15 +17,15 @@ import java.util.List;
 @Service
 public class CarService {
 
-    private final WebClient mapsWS;
-    private final WebClient pricingWS;
+    private final MapsClient mapsClient;
+    private final PriceClient priceClient;
     private final CarRepository repository;
 
     public CarService(CarRepository repository,
-                      @Qualifier("pricing") WebClient pricingWS,
-                      @Qualifier("maps") WebClient mapsWS) {
-        this.mapsWS = mapsWS;
-        this.pricingWS = pricingWS;
+                      PriceClient priceClient,
+                      MapsClient mapsClient) {
+        this.mapsClient = mapsClient;
+        this.priceClient = priceClient;
         this.repository = repository;
     }
 
@@ -52,36 +46,8 @@ public class CarService {
         Car car = this.repository.findById(id)
                 .orElseThrow(CarNotFoundException::new);
 
-        Price price = this.pricingWS.get()
-                .uri(String.format("/services/price?vehicleId=%d", id))
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON_UTF8)
-                .ifNoneMatch("*")
-                .retrieve()
-                .bodyToMono(String.class)
-                .map(response -> JSON.parseObject(response, Price.class))
-                .blockOptional(Duration.ofMinutes(5L))
-                .orElseThrow(CarNotFoundException::new);
-
-        car.setPrice(price.getPriceFormatted());
-
-        Location location = car.getLocation();
-        Address address = this.mapsWS.get()
-                .uri(String.format("/maps?lat=%s&lon=%s", location.getLat(), location.getLon()))
-                .header(HttpHeaders.CONTENT_TYPE, MediaType.APPLICATION_JSON_VALUE)
-                .accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_JSON_UTF8)
-                .ifNoneMatch("*")
-                .retrieve()
-                .bodyToMono(String.class)
-                .map(response -> JSON.parseObject(response, Address.class))
-                .blockOptional(Duration.ofMinutes(5L))
-                .orElseThrow(CarNotFoundException::new);
-
-        location.setAddress(address.getAddress());
-        location.setCity(address.getCity());
-        location.setState(address.getState());
-        location.setZip(address.getZip());
-
+        // Get price and location info from other services.
+        this.fillPriceAndLocationInfo(id, car);
         return car;
     }
 
@@ -92,16 +58,22 @@ public class CarService {
      */
     public Car save(Car car) {
         Long id = car.getId();
+
+        Car carSaved;
         if (id != null && id > 0) {
-            return repository.findById(id)
+            carSaved = this.repository.findById(id)
                     .map(carToBeUpdated -> {
+                        carToBeUpdated.setPrice(car.getPrice());
                         carToBeUpdated.setDetails(car.getDetails());
                         carToBeUpdated.setLocation(car.getLocation());
-                        return repository.save(carToBeUpdated);
+                        return this.repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
+        } else {
+            carSaved = this.repository.save(car);
         }
 
-        return repository.save(car);
+        this.fillPriceAndLocationInfo(carSaved.getId(), carSaved);
+        return carSaved;
     }
 
     /**
@@ -113,6 +85,19 @@ public class CarService {
                 .orElseThrow(CarNotFoundException::new);
 
         this.repository.delete(car);
+    }
+
+    /**
+     * Gets car price from pricing micro service and location from boogle-maps web services.
+     * @param id the ID number of the car to gather information on
+     * @param car the Car entity to fill the information on
+     */
+    private void fillPriceAndLocationInfo(Long id, Car car) {
+        String price = this.priceClient.getPrice(id);
+        car.setPrice(price);
+
+        Location newLocation = this.mapsClient.getAddress(car.getLocation());
+        car.setLocation(newLocation);
     }
 
 }

@@ -63,8 +63,19 @@ public class CarControllerTest {
      */
     @Before
     public void setup() {
+        long vehicleId = 1L;
         Car car = getCar();
-        car.setId(1L);
+        car.setId(vehicleId);
+
+        Location carLocation = car.getLocation();
+        Location location = getLocation(carLocation.getLat(), carLocation.getLon());
+        given(this.mapsClient.getAddress(carLocation)).willReturn(location);
+
+        String price = "USD 15670.00";
+        given(this.priceClient.getPrice(vehicleId)).willReturn(price);
+        car.setPrice(price);
+        car.setLocation(location);
+
         given(this.carService.save(any())).willReturn(car);
         given(this.carService.findById(any())).willReturn(car);
         given(this.carService.list()).willReturn(Collections.singletonList(car));
@@ -165,4 +176,20 @@ public class CarControllerTest {
         car.setCondition(Condition.USED);
         return car;
     }
+
+    /**
+     * Creates an example Location object for use in testing.
+     * @param lat the Latitude for Car's location.
+     * @param lon the Longitude for Car's location.
+     * @return an example Location object
+     */
+    private Location getLocation(Double lat, Double lon) {
+        Location location = new Location(lat, lon);
+        location.setZip("51030030");
+        location.setState("Pernambuco");
+        location.setCity("Recife");
+        location.setAddress("Avenida Boa Viagem");
+        return location;
+    }
+
 }
