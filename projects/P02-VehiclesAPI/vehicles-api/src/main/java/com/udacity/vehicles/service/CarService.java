@@ -59,18 +59,20 @@ public class CarService {
     public Car save(Car car) {
         Long id = car.getId();
 
+        Car carSaved;
         if (id != null && id > 0) {
-            return this.repository.findById(id)
+            carSaved = this.repository.findById(id)
                     .map(carToBeUpdated -> {
-                        this.fillPriceAndLocationInfo(car.getId(), carToBeUpdated);
+                        carToBeUpdated.setCondition(car.getCondition());
                         carToBeUpdated.setDetails(car.getDetails());
+                        carToBeUpdated.setLocation(car.getLocation());
                         return this.repository.save(carToBeUpdated);
                     }).orElseThrow(CarNotFoundException::new);
+        } else {
+            carSaved = this.repository.save(car);
         }
 
-        Car carSaved = this.repository.save(car);
         this.fillPriceAndLocationInfo(carSaved.getId(), carSaved);
-
         return carSaved;
     }
 
