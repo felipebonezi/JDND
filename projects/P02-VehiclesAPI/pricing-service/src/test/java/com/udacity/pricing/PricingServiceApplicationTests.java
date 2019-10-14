@@ -1,7 +1,6 @@
 package com.udacity.pricing;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.udacity.pricing.domain.price.Price;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -15,7 +14,8 @@ import org.springframework.test.web.servlet.MockMvc;
 
 import java.net.URI;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;

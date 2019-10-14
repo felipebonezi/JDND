@@ -1,12 +1,13 @@
 package com.udacity.vehicles.client.maps;
 
 import com.udacity.vehicles.domain.Location;
-import java.util.Objects;
 import org.modelmapper.ModelMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.Objects;
 
 /**
  * Implements a class to interface with the Maps Client for location data.
