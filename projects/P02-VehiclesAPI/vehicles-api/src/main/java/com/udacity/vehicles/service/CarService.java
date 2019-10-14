@@ -68,8 +68,10 @@ public class CarService {
                     }).orElseThrow(CarNotFoundException::new);
         }
 
-        this.fillPriceAndLocationInfo(car.getId(), car);
-        return this.repository.save(car);
+        Car carSaved = this.repository.save(car);
+        this.fillPriceAndLocationInfo(carSaved.getId(), carSaved);
+
+        return carSaved;
     }
 
     /**
